@@ -100,7 +100,7 @@ with col1:
 with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
     
-   def render_match_card(match_id, t1, t2, label1, label2):
+    def render_match_card(match_id, t1, t2, label1, label2):
         st.markdown(f"""
         <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
             <span style="font-weight: bold; color: #475569; font-size: 11px; background-color: #f1f5f9; padding: 3px 8px; border-radius: 4px;">{match_id}</span>
