@@ -8,6 +8,11 @@ st.set_page_config(page_title="2026 World Cup Center", layout="wide")
 st.title("🏆 Live 2026 World Cup Tournament Center")
 st.write("Real-time 3rd-Place Ladder Analytics & Round of 32 Roadmap")
 
+# Quick developer hotkey to completely cycle the API connection on the live site
+if st.button("🔄 Disconnect & Reconnect API Cache"):
+    st.cache_data.clear()
+    st.rerun()
+
 # ==========================================
 # API CONFIGURATION
 # ==========================================
@@ -15,28 +20,12 @@ API_URL = "https://api.football-data.org/v4/competitions/WC/standings"
 API_TOKEN = "dec42f1962144eac9735b3111c7aa3de"
 HEADERS = {"X-Auth-Token": API_TOKEN}
 
-# Web-native emoji flags (guaranteed to render beautifully on iOS, Android, and Windows browsers)
-FLAGS = {
-    "Argentina": "🇦🇷", "Algeria": "🇩🇿", "Australia": "🇦🇺", "Austria": "🇦🇹", 
-    "Belgium": "🇧🇪", "Bosnia-Herzegovina": "🇧🇦", "Bosnia-H.": "🇧🇦", "Brazil": "🇧🇷", 
-    "Canada": "🇨🇦", "Cape Verde": "🇨🇻", "Chile": "🇨🇱", "Colombia": "🇨🇴", 
-    "Congo DR": "🇨🇩", "Croatia": "🇭🇷", "Denmark": "🇩🇰", "Ecuador": "🇪🇨", 
-    "Egypt": "🇪🇬", "England": "🏴󠁧󠁢󠁥󠁮󠁧󠁿", "France": "🇫🇷", "Germany": "🇩🇪", 
-    "Ghana": "🇬🇭", "Iran": "🇮🇷", "Italy": "🇮🇹", "Ivory Coast": "🇨🇮", 
-    "Japan": "🇯🇵", "Korea Republic": "🇰🇷", "Korea Rep.": "🇰🇷", "South Korea": "🇰🇷", 
-    "Mexico": "🇲🇽", "Morocco": "🇲🇦", "Netherlands": "🇳🇱", "Paraguay": "🇵🇾", 
-    "Portugal": "🇵🇹", "Scotland": "🏴󠁧󠁢󠁳󠁣󠁴󠁿", "Senegal": "🇸🇳", "Spain": "🇪🇸", 
-    "Sweden": "🇸🇪", "Switzerland": "🇨🇭", "Turkey": "🇹🇷", "Uruguay": "🇺🇾", "USA": "🇺🇸",
-    "South Africa": "🇿🇦", "South Africa Rep.": "🇿🇦", "RSA": "🇿🇦"
-}
-
 def get_flag(team_name):
-    if not team_name:
-        return ""
+    if not team_name or str(team_name).lower() == "none" or "tbd" in str(team_name).lower():
+        return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
         
     team_lower = str(team_name).lower()
     
-    # 2-letter ISO code mapping for the teams
     code_map = {
         "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
         "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
@@ -46,11 +35,9 @@ def get_flag(team_name):
         "brazil": "br", "australia": "au", "ivory coast": "ci", "japan": "jp",
         "mexico": "mx", "argentina": "ar", "uruguay": "uy", "iran": "ir",
         "switzerland": "ch", "colombia": "co", "senegal": "sn", "egypt": "eg",
-        # Special matching for DR and UK nations
         "dr": "cd", "scotland": "gb-sct", "england": "gb-eng"
     }
     
-    # Find the code
     country_code = None
     for key, code in code_map.items():
         if key in team_lower:
@@ -60,9 +47,9 @@ def get_flag(team_name):
     if country_code:
         return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
         
-    return ""
+    return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
 
-@st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
+@st.cache_data(ttl=300) 
 def fetch_bracket_data():
     try:
         response = requests.get(API_URL, headers=HEADERS)
@@ -83,7 +70,8 @@ def fetch_bracket_data():
             df = pd.DataFrame(third_places).sort_values(by=["Points", "GD", "GF"], ascending=False).reset_index(drop=True)
             df["Rank"] = df.index + 1
             return winners, runners_up, df
-    except: pass
+    except: 
+        pass
 
     # Post-Group Stage Fallback Dataset
     w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
@@ -113,65 +101,41 @@ def get_3rd(choices):
         if c in t3_orig:
             for g, team in t3.items():
                 if team is not None: t3[g] = None; return team
-    return "TBD 3rd"
+    return "TBD"
 
 # ==========================================
 # 3. WEB INTERFACE DESIGN
 # ==========================================
 col1, col2 = st.columns([1, 2.2])
 
+# Unified naming mapper applied across elements
+name_replacements = {
+    "congo dr": "DR Congo",
+    "korea republic": "South Korea",
+    "cengo dr": "DR Congo"
+}
+
+def clean_team_name(name_str):
+    if not name_str or str(name_str).lower() == "none":
+        return "TBD"
+    words = str(name_str).split()
+    if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
+        name_str = " ".join(words[1:])
+    return name_replacements.get(name_str.lower(), name_str)
+
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
-    
-    # Custom name overrides
-    name_replacements = {
-        "congo dr": "DR Congo",
-        "korea republic": "South Korea"
-    }
-    
-    def clean_team_name(name_str):
-        # 1. Strip the 2-letter lowercase prefix if present
-        words = str(name_str).split()
-        if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
-            name_str = " ".join(words[1:])
-        else:
-            name_str = str(name_str)
-            
-        # 2. Apply explicit naming overrides
-        return name_replacements.get(name_str.lower(), name_str)
-
-    # Render flag images next to the perfectly mapped country names
     display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
-    
     st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
 
     def render_match_card(match_id, t1, t2, label1, label2):
-        # 1. Standardize and clean the names for the fixtures map
-        def fix_name(name_str):
-            if not name_str:
-                return ""
-            words = str(name_str).split()
-            # Strip the 2-letter lowercase code if present (e.g., 'kr Korea Republic' -> 'Korea Republic')
-            if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
-                name_str = " ".join(words[1:])
-            else:
-                name_str = str(name_str)
-                
-            # Apply explicit overrides
-            replacements = {
-                "congo dr": "DR Congo",
-                "korea republic": "South Korea"
-            }
-            return replacements.get(name_str.lower(), name_str)
+        clean_t1 = clean_team_name(t1)
+        clean_t2 = clean_team_name(t2)
 
-        clean_t1 = fix_name(t1)
-        clean_t2 = fix_name(t2)
-
-        # 2. Build the high-contrast single-line string with the new clean names
         html_content = f'<div style="border:2px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:14px;background-color:#ffffff;box-shadow:0 3px 6px rgba(0,0,0,0.08);">' \
                        f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif;">{match_id}</span>' \
                        f'<div style="margin-top:12px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label1}:</b> {clean_t1}</span></div>' \
