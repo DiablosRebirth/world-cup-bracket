@@ -100,15 +100,19 @@ with col1:
 with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
     
-    def render_match_card(match_id, t1, t2, label1, label2):
+   def render_match_card(match_id, t1, t2, label1, label2):
         st.markdown(f"""
-        <div style="border: 1px solid #e2e8f0; border-radius: 6px; padding: 10px; margin-bottom: 12px; background-color: #ffffff; box-shadow: 0 1px 3px rgba(0,0,0,0.05);">
-            <span style="font-weight: bold; color: #64748b; font-size: 11px; background-color: #f1f5f9; padding: 2px 6px; border-radius: 4px;">{match_id}</span>
-            <div style="margin-top: 6px; font-size: 14px; display: flex; justify-content: space-between;">
-                <span>{get_flag(t1)} <b style="color: #475569;">{label1}:</b> {t1}</span>
+        <div style="border: 1px solid #cbd5e1; border-radius: 8px; padding: 12px; margin-bottom: 12px; background-color: #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+            <span style="font-weight: bold; color: #475569; font-size: 11px; background-color: #f1f5f9; padding: 3px 8px; border-radius: 4px;">{match_id}</span>
+            
+            <div style="margin-top: 8px; font-size: 14px; color: #0f172a; display: flex; align-items: center;">
+                <span style="margin-right: 8px;">{get_flag(t1)}</span>
+                <span style="color: #0f172a;"><b style="color: #64748b; font-weight: 600;">{label1}:</b> {t1}</span>
             </div>
-            <div style="margin-top: 4px; font-size: 14px; display: flex; justify-content: space-between;">
-                <span>{get_flag(t2)} <b style="color: #475569;">{label2}:</b> {t2}</span>
+            
+            <div style="margin-top: 6px; font-size: 14px; color: #0f172a; display: flex; align-items: center;">
+                <span style="margin-right: 8px;">{get_flag(t2)}</span>
+                <span style="color: #0f172a;"><b style="color: #64748b; font-weight: 600;">{label2}:</b> {t2}</span>
             </div>
         </div>
         """, unsafe_allow_html=True)
