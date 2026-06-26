@@ -101,10 +101,10 @@ with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
 
     def render_match_card(match_id, t1, t2, label1, label2):
-        html_content = f'<div style="border:1px solid #cbd5e1;border-radius:8px;padding:12px;margin-bottom:12px;background-color:#ffffff;box-shadow:0 2px 4px rgba(0,0,0,0.05);">' \
-                       f'<span style="font-weight:bold;color:#475569;font-size:11px;background-color:#f1f5f9;padding:3px 8px;border-radius:4px;">{match_id}</span>' \
-                       f'<div style="margin-top:8px;font-size:14px;color:#0f172a;display:flex;align-items:center;"><span style="margin-right:8px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#64748b;font-weight:600;">{label1}:</b> {t1}</span></div>' \
-                       f'<div style="margin-top:6px;font-size:14px;color:#0f172a;display:flex;align-items:center;"><span style="margin-right:8px;">{get_flag(t2)}</span><span style="color:#0f172a;"><b style="color:#64748b;font-weight:600;">{label2}:</b> {t2}</span></div>' \
+        html_content = f'<div style="border:2px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:14px;background-color:#ffffff;box-shadow:0 3px 6px rgba(0,0,0,0.08);">' \
+                       f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif;">{match_id}</span>' \
+                       f'<div style="margin-top:12px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label1}:</b> {t1}</span></div>' \
+                       f'<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t2)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label2}:</b> {t2}</span></div>' \
                        f'</div>'
         st.markdown(html_content, unsafe_allow_html=True)
 
