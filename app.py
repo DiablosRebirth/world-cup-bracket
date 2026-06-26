@@ -183,4 +183,32 @@ with col2:
         clean_t2 = clean_team_name(t2)
 
         html_content = f'<div style="border:2px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:14px;background-color:#ffffff;box-shadow:0 3px 6px rgba(0,0,0,0.08);">' \
-                       f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif
+                       f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif;">{match_id}</span>' \
+                       f'<div style="margin-top:12px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label1}:</b> {clean_t1}</span></div>' \
+                       f'<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t2)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label2}:</b> {clean_t2}</span></div>' \
+                       f'</div>'
+        st.markdown(html_content, unsafe_allow_html=True)
+
+    m_col1, m_col2 = st.columns(2)
+    
+    with m_col1:
+        st.markdown("#### 🟦 Left Tree Panel")
+        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
+        render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
+        render_match_card("M74", winners.get("E"), m74_3rd, "E1", "3rd")
+        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")
+        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")
+        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
+        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
+        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
+
+    with m_col2:
+        st.markdown("#### 🟩 Right Tree Panel")
+        render_match_card("M76", winners.get("C"), runners_up.get("F"), "C1", "F2")
+        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "E2", "I2")
+        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
+        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
+        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
+        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")
+        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
+        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
