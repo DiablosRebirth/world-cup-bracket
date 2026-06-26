@@ -1,54 +1,3 @@
-import streamlit as st
-import pandas as pd
-import requests
-
-# Set up page layout for seamless mobile + desktop viewing
-st.set_page_config(page_title="2026 World Cup Center", layout="wide")
-
-st.title("🏆 Live 2026 World Cup Tournament Center")
-st.write("Real-time 3rd-Place Ladder Analytics & Round of 32 Roadmap")
-
-# Quick developer hotkey to completely cycle the API connection on the live site
-if st.button("🔄 Disconnect & Reconnect API Cache"):
-    st.cache_data.clear()
-    st.rerun()
-
-# ==========================================
-# API CONFIGURATION
-# ==========================================
-API_URL = "https://api.football-data.org/v4/competitions/WC/standings"
-API_TOKEN = "dec42f1962144eac9735b3111c7aa3de"
-HEADERS = {"X-Auth-Token": API_TOKEN}
-
-def get_flag(team_name):
-    if not team_name or str(team_name).lower() == "none" or "tbd" in str(team_name).lower():
-        return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
-        
-    team_lower = str(team_name).lower()
-    
-    code_map = {
-        "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
-        "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
-        "belgium": "be", "germany": "de", "france": "fr", "south africa": "za",
-        "canada": "ca", "netherlands": "nl", "morocco": "ma", "portugal": "pt",
-        "ghana": "gh", "spain": "es", "austria": "at", "usa": "us",
-        "brazil": "br", "australia": "au", "ivory coast": "ci", "japan": "jp",
-        "mexico": "mx", "argentina": "ar", "uruguay": "uy", "iran": "ir",
-        "switzerland": "ch", "colombia": "co", "senegal": "sn", "egypt": "eg",
-        "dr": "cd", "scotland": "gb-sct", "england": "gb-eng"
-    }
-    
-    country_code = None
-    for key, code in code_map.items():
-        if key in team_lower:
-            country_code = code
-            break
-            
-    if country_code:
-        return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
-        
-    return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
-
 @st.cache_data(ttl=60) # Set to 1 minute for live tournament tracking
 def fetch_bracket_data():
     try:
@@ -80,9 +29,11 @@ def fetch_bracket_data():
             return winners, runners_up, df
             
     except Exception as e:
-        st.sidebar.error(f"⚠️ API Fetch Error: {e}")
+        # Gracefully log the live warning in the sidebar without halting execution
+        st.sidebar.warning(f"🔄 Running on Bracket Fallback: {e}")
 
-    # Fallback Dataset
+    # --- SOLID FALLBACK DATASET ---
+    # This guarantees the app ALWAYS has data to load even if the API throws a wrench
     w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
     r = {"A": "South Africa", "B": "Canada", "C": "USA", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "France", "J": "Austria", "K": "Colombia", "L": "Paraguay"}
     df_mock = pd.DataFrame([
@@ -100,4 +51,12 @@ def fetch_bracket_data():
 # DATA INGESTION & PIPELINE SETUP
 # ==========================================
 winners, runners_up, df_3rd = fetch_bracket_data()
-df_3rd["Status"] =
+
+# Absolute safety check: If df_3rd is completely missing or empty, build an empty fallback shell 
+if df_3rd is None or df_3rd.empty:
+    df_3rd = pd.DataFrame(columns=["Rank", "Group", "Team", "Points", "GD", "GF"])
+
+df_3rd["Status"] = ["🟢 Qualified" if r <= 8 else "🔴 Eliminated" for r in df_3rd["Rank"]]
+top_8 = df_3rd[df_3rd["Rank"] <= 8]
+t3 = dict(zip(top_8["Group"], top_8["Team"]))
+t3_orig = t3.copy()
