@@ -78,16 +78,18 @@ def fetch_bracket_data():
     except Exception as e: 
         st.sidebar.warning(f"🔄 API Syncing - Using Live Fallback Engine: {e}")
 
-    # Solid Global Fallbacks
-    w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
-    r = {"A": "South Africa", "B": "Canada", "C": "USA", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "France", "J": "Austria", "K": "Colombia", "L": "Paraguay"}
+    # Solid Global Fallbacks (Static text snapshot if API is completely unreachable)
+    w = {"A": "Mexico", "B": "Switzerland", "C": "Brazil", "D": "USA", "E": "Germany", "F": "Netherlands", "G": "Egypt", "H": "Spain", "I": "France", "J": "Argentina", "K": "Portugal", "L": "England"}
+    r = {"A": "South Africa", "B": "Canada", "C": "Morocco", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "Norway", "J": "Austria", "K": "Colombia", "L": "Ghana"}
     df_mock = pd.DataFrame([
-        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 6}, {"Group": "E", "Team": "Ecuador", "Points": 4, "GD": 0, "GF": 2},
-        {"Group": "B", "Team": "Bosnia-H.", "Points": 4, "GD": -1, "GF": 5}, {"Group": "L", "Team": "Croatia", "Points": 3, "GD": -1, "GF": 3},
-        {"Group": "A", "Team": "Korea Republic", "Points": 3, "GD": -1, "GF": 2}, {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -2, "GF": 2},
-        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -2, "GF": 2}, {"Group": "C", "Team": "Scotland", "Points": 3, "GD": -3, "GF": 1},
-        {"Group": "H", "Team": "Cape Verde", "Points": 2, "GD": 0, "GF": 2}, {"Group": "G", "Team": "Belgium", "Points": 2, "GD": 0, "GF": 1},
-        {"Group": "K", "Team": "Congo DR", "Points": 1, "GD": -1, "GF": 1}, {"Group": "I", "Team": "Senegal", "Points": 0, "GD": -3, "GF": 3}
+        {"Group": "A", "Team": "South Korea", "Points": 4, "GD": 1, "GF": 4},
+        {"Group": "C", "Team": "Scotland", "Points": 4, "GD": 0, "GF": 3},
+        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 2},
+        {"Group": "L", "Team": "Ecuador", "Points": 3, "GD": 1, "GF": 5},
+        {"Group": "B", "Team": "Bosnia-H.", "Points": 3, "GD": 0, "GF": 3},
+        {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -1, "GF": 2},
+        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -1, "GF": 2},
+        {"Group": "K", "Team": "Croatia", "Points": 3, "GD": -2, "GF": 1}
     ])
     df_mock["Rank"] = df_mock.index + 1
     return w, r, df_mock
@@ -97,32 +99,26 @@ def fetch_bracket_data():
 # ==========================================
 fetch_res = fetch_bracket_data()
 
-if fetch_res and len(fetch_res) == 3:
+# Absolute validation guard: Unpack cleanly or load whole structural fallback at once
+if fetch_res and len(fetch_res) == 3 and fetch_res[2] is not None:
     winners, runners_up, df_3rd = fetch_res
 else:
-    winners, runners_up = {}, {}
-    df_3rd = None
-
-# If df_3rd is empty, instantiate clean data structure right away
-if df_3rd is None or df_3rd.empty or "Rank" not in df_3rd.columns:
+    winners = {"A": "Mexico", "B": "Switzerland", "C": "Brazil", "D": "USA", "E": "Germany", "F": "Netherlands", "G": "Egypt", "H": "Spain", "I": "France", "J": "Argentina", "K": "Portugal", "L": "England"}
+    runners_up = {"A": "South Africa", "B": "Canada", "C": "Morocco", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "Norway", "J": "Austria", "K": "Colombia", "L": "Ghana"}
     df_3rd = pd.DataFrame([
-        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 6},
-        {"Group": "E", "Team": "Ecuador", "Points": 4, "GD": 0, "GF": 2},
-        {"Group": "B", "Team": "Bosnia-H.", "Points": 4, "GD": -1, "GF": 5},
-        {"Group": "L", "Team": "Croatia", "Points": 3, "GD": -1, "GF": 3},
-        {"Group": "A", "Team": "Korea Republic", "Points": 3, "GD": -1, "GF": 2},
-        {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -2, "GF": 2},
-        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -2, "GF": 2},
-        {"Group": "C", "Team": "Scotland", "Points": 3, "GD": -3, "GF": 1}
+        {"Group": "A", "Team": "South Korea", "Points": 4, "GD": 1, "GF": 4},
+        {"Group": "C", "Team": "Scotland", "Points": 4, "GD": 0, "GF": 3},
+        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 2},
+        {"Group": "L", "Team": "Ecuador", "Points": 3, "GD": 1, "GF": 5},
+        {"Group": "B", "Team": "Bosnia-H.", "Points": 3, "GD": 0, "GF": 3},
+        {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -1, "GF": 2},
+        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -1, "GF": 2},
+        {"Group": "K", "Team": "Croatia", "Points": 3, "GD": -2, "GF": 1}
     ])
     df_3rd["Rank"] = df_3rd.index + 1
 
 df_3rd["Status"] = ["🟢 Qualified" if r <= 8 else "🔴 Eliminated" for r in df_3rd["Rank"]]
-
-# CRITICAL SECURITY FIX: Fallback layout verification check if top_8 slice returns empty
 top_8 = df_3rd[df_3rd["Rank"] <= 8].copy()
-if top_8.empty:
-    top_8 = df_3rd.head(8).copy()
 
 # ==========================================
 # DYNAMIC 3RD-PLACE ALLOCATION ENGINE
@@ -140,7 +136,7 @@ def get_live_3rd(preferred_groups):
         return next_best["Team"]
     return "TBD"
 
-# Run allocation sequences smoothly
+# Calculate arrays linearly without structural leaks
 m74_3rd = get_live_3rd(['A','B','C','D','F'])
 m77_3rd = get_live_3rd(['C','D','F','G','H'])
 m79_3rd = get_live_3rd(['C','E','F','H','I'])
