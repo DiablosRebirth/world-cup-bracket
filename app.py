@@ -32,55 +32,36 @@ FLAGS = {
 
 def get_flag(team_name):
     if not team_name:
-        return "🏳️"
+        return ""
         
     team_lower = str(team_name).lower()
     
-    # 1. Clean Scotland fix (no stray characters!)
-    if "scotland" in team_lower:
-        return "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
-        
-    # 2. Complete mapping for the exact teams currently in your tournament
-    flag_map = {
-        "sweden": "🇸🇪",
-        "ecuador": "🇪🇨",
-        "bosnia": "🇧🇦",
-        "croatia": "🇭🇷",
-        "korea": "🇰🇷",
-        "paraguay": "🇵🇾",
-        "algeria": "🇩🇿",
-        "cape verde": "🇨🇻",
-        "belgium": "🇧🇪",
-        "germany": "🇩🇪",
-        "france": "🇫🇷",
-        "south africa": "🇿🇦",
-        "canada": "🇨🇦",
-        "netherlands": "🇳🇱",
-        "morocco": "🇲🇦",
-        "portugal": "🇵🇹",
-        "ghana": "🇬🇭",
-        "spain": "🇪🇸",
-        "austria": "🇦🇹",
-        "usa": "🇺🇸",
-        "brazil": "🇧🇷",
-        "australia": "🇦🇺",
-        "ivory coast": "🇨🇮",
-        "japan": "🇯🇵",
-        "mexico": "🇲🇽",
-        "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
-        "argentina": "🇦🇷",
-        "uruguay": "🇺🇾",
-        "iran": "🇮🇷",
-        "switzerland": "🇨🇭",
-        "colombia": "🇨🇴"
+    # 2-letter ISO code mapping for the exact teams in your tournament
+    code_map = {
+        "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
+        "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
+        "belgium": "be", "germany": "de", "france": "fr", "south africa": "za",
+        "canada": "ca", "netherlands": "nl", "morocco": "ma", "portugal": "pt",
+        "ghana": "gh", "spain": "es", "austria": "at", "usa": "us",
+        "brazil": "br", "australia": "au", "ivory coast": "ci", "japan": "jp",
+        "mexico": "mx", "argentina": "ar", "uruguay": "uy", "iran": "ir",
+        "switzerland": "ch", "colombia": "co",
+        # Special cases for UK nations
+        "scotland": "gb-sct", "england": "gb-eng"
     }
     
-    # Search the map for a match
-    for key, emoji in flag_map.items():
+    # Find the code
+    country_code = None
+    for key, code in code_map.items():
         if key in team_lower:
-            return emoji
+            country_code = code
+            break
             
-    return "🏳️"
+    if country_code:
+        # Returns a beautifully sharp, rendered flat flag image tag
+        return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
+        
+    return ""
 
 @st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
 def fetch_bracket_data():
@@ -143,8 +124,12 @@ col1, col2 = st.columns([1, 2.2])
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
-    display_df["Team"] = display_df["Team"].apply(lambda x: f"{get_flag(x)} {x}")
-    st.dataframe(display_df, use_container_width=True, hide_index=True)
+    
+    # This securely pairs the flag image layout next to the team name text string
+    display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {row['Team'].split()[-1] if len(row['Team'].split())>1 else row['Team']}", axis=1)
+    
+    # Switch st.dataframe to st.write with unsafe HTML so it draws the images!
+    st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
