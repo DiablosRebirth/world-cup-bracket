@@ -155,8 +155,8 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
-        # Updated map pairs based on live tournament configurations
-        render_match_card("M74", winners.get("E"), get_3rd(['A','B','C','D','F']), "E1", "3rd")
+        # Pristine regulatory template positions for the Left Tree Panel
+        render_match_card("M74", winners.get("J"), get_3rd(['A','B','C','D','F']), "J1", "3rd")
         render_match_card("M77", winners.get("I"), get_3rd(['C','D','F','G','H']), "I1", "3rd")
         render_match_card("M73", winners.get("A"), runners_up.get("B"), "A1", "B2")
         render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
@@ -167,9 +167,9 @@ with col2:
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        # DYNAMIC ADJUSTMENT: Swap fixed assignments to point to your live group variables
-        render_match_card("M76", winners.get("E"), runners_up.get("F"), "E1", "F2")
-        render_match_card("M78", runners_up.get("E"), winners.get("I"), "E2", "I1")
+        # Pristine regulatory template positions for the Right Tree Panel
+        render_match_card("M76", winners.get("E"), runners_up.get("D"), "E1", "D2")
+        render_match_card("M78", runners_up.get("E"), runners_up.get("F"), "E2", "F2")
         render_match_card("M79", winners.get("A"), get_3rd(['C','E','F','H','I']), "A1", "3rd")
         render_match_card("M80", winners.get("L"), get_3rd(['E','H','I','J','K']), "L1", "3rd")
         render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
