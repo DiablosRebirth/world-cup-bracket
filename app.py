@@ -150,10 +150,32 @@ with col2:
     st.subheader("⚔️ Live Round of 32 Fixtures Map")
 
     def render_match_card(match_id, t1, t2, label1, label2):
+        # 1. Standardize and clean the names for the fixtures map
+        def fix_name(name_str):
+            if not name_str:
+                return ""
+            words = str(name_str).split()
+            # Strip the 2-letter lowercase code if present (e.g., 'kr Korea Republic' -> 'Korea Republic')
+            if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
+                name_str = " ".join(words[1:])
+            else:
+                name_str = str(name_str)
+                
+            # Apply explicit overrides
+            replacements = {
+                "congo dr": "DR Congo",
+                "korea republic": "South Korea"
+            }
+            return replacements.get(name_str.lower(), name_str)
+
+        clean_t1 = fix_name(t1)
+        clean_t2 = fix_name(t2)
+
+        # 2. Build the high-contrast single-line string with the new clean names
         html_content = f'<div style="border:2px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:14px;background-color:#ffffff;box-shadow:0 3px 6px rgba(0,0,0,0.08);">' \
                        f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif;">{match_id}</span>' \
-                       f'<div style="margin-top:12px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label1}:</b> {t1}</span></div>' \
-                       f'<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t2)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label2}:</b> {t2}</span></div>' \
+                       f'<div style="margin-top:12px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t1)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label1}:</b> {clean_t1}</span></div>' \
+                       f'<div style="margin-top:8px;border-top:1px dashed #e2e8f0;padding-top:8px;font-size:16px;color:#0f172a;display:flex;align-items:center;font-family:sans-serif;"><span style="margin-right:10px;font-size:20px;">{get_flag(t2)}</span><span style="color:#0f172a;"><b style="color:#475569;font-weight:700;">{label2}:</b> {clean_t2}</span></div>' \
                        f'</div>'
         st.markdown(html_content, unsafe_allow_html=True)
 
