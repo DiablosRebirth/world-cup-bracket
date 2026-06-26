@@ -131,6 +131,16 @@ def clean_team_name(name_str):
         name_str = " ".join(words[1:])
     return name_replacements.get(name_str.lower(), name_str)
 
+# PRE-CALCULATE ALL 3RD-PLACE ALLOCATIONS IN STABLE SEQUENTIAL ORDER
+m74_3rd = get_3rd(['A','B','C','D','F'])
+m77_3rd = get_3rd(['C','D','F','G','H'])
+m81_3rd = get_3rd(['B','E','F','I','J'])
+m82_3rd = get_3rd(['A','E','H','I','J'])
+m79_3rd = get_3rd(['C','E','F','H','I'])
+m80_3rd = get_3rd(['E','H','I','J','K'])
+m85_3rd = get_3rd(['E','F','G','I','J'])
+m87_3rd = get_3rd(['D','E','I','J','L'])
+
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
@@ -155,24 +165,23 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
-        # Pristine regulatory template positions for the Left Tree Panel
-        render_match_card("M74", winners.get("J"), get_3rd(['A','B','C','D','F']), "J1", "3rd")
-        render_match_card("M77", winners.get("I"), get_3rd(['C','D','F','G','H']), "I1", "3rd")
-        render_match_card("M73", winners.get("A"), runners_up.get("B"), "A1", "B2")
+        # Match 73 fixed to runners_up A2 vs B2 (South Africa vs Canada)
+        render_match_card("M74", winners.get("J"), m74_3rd, "J1", "3rd")
+        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")
+        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
         render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
         render_match_card("M83", winners.get("K"), runners_up.get("L"), "K1", "L2")
         render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
-        render_match_card("M81", winners.get("D"), get_3rd(['B','E','F','I','J']), "D1", "3rd")
-        render_match_card("M82", winners.get("G"), get_3rd(['A','E','H','I','J']), "G1", "3rd")
+        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
+        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        # Pristine regulatory template positions for the Right Tree Panel
-        render_match_card("M76", winners.get("E"), runners_up.get("D"), "E1", "D2")
-        render_match_card("M78", runners_up.get("E"), runners_up.get("F"), "E2", "F2")
-        render_match_card("M79", winners.get("A"), get_3rd(['C','E','F','H','I']), "A1", "3rd")
-        render_match_card("M80", winners.get("L"), get_3rd(['E','H','I','J','K']), "L1", "3rd")
+        render_match_card("M76", winners.get("E"), runners_up.get("F"), "E1", "F2")
+        render_match_card("M78", runners_up.get("E"), winners.get("I"), "E2", "I1")
+        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
+        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
         render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
         render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")
-        render_match_card("M85", winners.get("B"), get_3rd(['E','F','G','I','J']), "B1", "3rd")
-        render_match_card("M87", winners.get("K"), get_3rd(['D','E','I','J','L']), "K1", "3rd")
+        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
+        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
