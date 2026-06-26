@@ -25,6 +25,7 @@ def get_flag(team_name):
         return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
         
     team_lower = str(team_name).lower()
+    
     code_map = {
         "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
         "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
@@ -45,6 +46,7 @@ def get_flag(team_name):
             
     if country_code:
         return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
+        
     return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
 
 @st.cache_data(ttl=60) 
@@ -78,79 +80,42 @@ def fetch_bracket_data():
     except Exception as e: 
         st.sidebar.warning(f"🔄 API Syncing - Using Live Fallback Engine: {e}")
 
-    # Solid Global Fallbacks (Static text snapshot if API is completely unreachable)
-    w = {"A": "Mexico", "B": "Switzerland", "C": "Brazil", "D": "USA", "E": "Germany", "F": "Netherlands", "G": "Egypt", "H": "Spain", "I": "France", "J": "Argentina", "K": "Portugal", "L": "England"}
-    r = {"A": "South Africa", "B": "Canada", "C": "Morocco", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "Norway", "J": "Austria", "K": "Colombia", "L": "Ghana"}
+    # Post-Group Stage Fallback Dataset (Guaranteed safe structure)
+    w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
+    r = {"A": "South Africa", "B": "Canada", "C": "USA", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "France", "J": "Austria", "K": "Colombia", "L": "Paraguay"}
     df_mock = pd.DataFrame([
-        {"Group": "A", "Team": "South Korea", "Points": 4, "GD": 1, "GF": 4},
-        {"Group": "C", "Team": "Scotland", "Points": 4, "GD": 0, "GF": 3},
-        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 2},
-        {"Group": "L", "Team": "Ecuador", "Points": 3, "GD": 1, "GF": 5},
-        {"Group": "B", "Team": "Bosnia-H.", "Points": 3, "GD": 0, "GF": 3},
-        {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -1, "GF": 2},
-        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -1, "GF": 2},
-        {"Group": "K", "Team": "Croatia", "Points": 3, "GD": -2, "GF": 1}
+        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 6}, {"Group": "E", "Team": "Ecuador", "Points": 4, "GD": 0, "GF": 2},
+        {"Group": "B", "Team": "Bosnia-H.", "Points": 4, "GD": -1, "GF": 5}, {"Group": "L", "Team": "Croatia", "Points": 3, "GD": -1, "GF": 3},
+        {"Group": "A", "Team": "Korea Republic", "Points": 3, "GD": -1, "GF": 2}, {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -2, "GF": 2},
+        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -2, "GF": 2}, {"Group": "C", "Team": "Scotland", "Points": 3, "GD": -3, "GF": 1},
+        {"Group": "H", "Team": "Cape Verde", "Points": 2, "GD": 0, "GF": 2}, {"Group": "G", "Team": "Belgium", "Points": 2, "GD": 0, "GF": 1},
+        {"Group": "K", "Team": "Congo DR", "Points": 1, "GD": -1, "GF": 1}, {"Group": "I", "Team": "Senegal", "Points": 0, "GD": -3, "GF": 3}
     ])
     df_mock["Rank"] = df_mock.index + 1
     return w, r, df_mock
 
-# ==========================================
-# DATA INGESTION & PIPELINE SETUP
-# ==========================================
-fetch_res = fetch_bracket_data()
-
-# Absolute validation guard: Unpack cleanly or load whole structural fallback at once
-if fetch_res and len(fetch_res) == 3 and fetch_res[2] is not None:
-    winners, runners_up, df_3rd = fetch_res
-else:
-    winners = {"A": "Mexico", "B": "Switzerland", "C": "Brazil", "D": "USA", "E": "Germany", "F": "Netherlands", "G": "Egypt", "H": "Spain", "I": "France", "J": "Argentina", "K": "Portugal", "L": "England"}
-    runners_up = {"A": "South Africa", "B": "Canada", "C": "Morocco", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "Norway", "J": "Austria", "K": "Colombia", "L": "Ghana"}
-    df_3rd = pd.DataFrame([
-        {"Group": "A", "Team": "South Korea", "Points": 4, "GD": 1, "GF": 4},
-        {"Group": "C", "Team": "Scotland", "Points": 4, "GD": 0, "GF": 3},
-        {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 2},
-        {"Group": "L", "Team": "Ecuador", "Points": 3, "GD": 1, "GF": 5},
-        {"Group": "B", "Team": "Bosnia-H.", "Points": 3, "GD": 0, "GF": 3},
-        {"Group": "D", "Team": "Paraguay", "Points": 3, "GD": -1, "GF": 2},
-        {"Group": "J", "Team": "Algeria", "Points": 3, "GD": -1, "GF": 2},
-        {"Group": "K", "Team": "Croatia", "Points": 3, "GD": -2, "GF": 1}
-    ])
-    df_3rd["Rank"] = df_3rd.index + 1
-
+winners, runners_up, df_3rd = fetch_bracket_data()
 df_3rd["Status"] = ["🟢 Qualified" if r <= 8 else "🔴 Eliminated" for r in df_3rd["Rank"]]
-top_8 = df_3rd[df_3rd["Rank"] <= 8].copy()
+top_8 = df_3rd[df_3rd["Rank"] <= 8]
+t3 = dict(zip(top_8["Group"], top_8["Team"]))
+t3_orig = t3.copy()
 
-# ==========================================
-# DYNAMIC 3RD-PLACE ALLOCATION ENGINE
-# ==========================================
-available_3rd = top_8.sort_values(by="Rank").to_dict(orientation="records")
-
-def get_live_3rd(preferred_groups):
-    for team_record in available_3rd:
-        if team_record["Group"] in preferred_groups:
-            available_3rd.remove(team_record)
-            return team_record["Team"]
-            
-    if available_3rd:
-        next_best = available_3rd.pop(0)
-        return next_best["Team"]
+def get_3rd(choices):
+    for c in choices:
+        if c in t3 and t3[c] is not None:
+            team = t3[c]; t3[c] = None; return team
+    for c in choices:
+        if c in t3_orig:
+            for g, team in t3.items():
+                if team is not None: t3[g] = None; return team
     return "TBD"
-
-# Calculate arrays linearly without structural leaks
-m74_3rd = get_live_3rd(['A','B','C','D','F'])
-m77_3rd = get_live_3rd(['C','D','F','G','H'])
-m79_3rd = get_live_3rd(['C','E','F','H','I'])
-m80_3rd = get_live_3rd(['E','H','I','J','K'])
-m82_3rd = get_live_3rd(['A','E','H','I','J'])
-m81_3rd = get_live_3rd(['B','E','F','I','J'])
-m87_3rd = get_live_3rd(['D','E','I','J','L'])
-m85_3rd = get_live_3rd(['E','F','G','I','J'])
 
 # ==========================================
 # 3. WEB INTERFACE DESIGN
 # ==========================================
 col1, col2 = st.columns([1, 2.2])
 
+# Unified naming mapper applied across elements
 name_replacements = {
     "congo dr": "DR Congo",
     "korea republic": "South Korea",
@@ -191,20 +156,20 @@ with col2:
         st.markdown("#### 🟦 Left Tree Panel")
         render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
         render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
-        render_match_card("M74", winners.get("E"), m74_3rd, "E1", "3rd")
-        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")
+        render_match_card("M74", winners.get("E"), get_3rd(['A','B','C','D','F']), "E1", "3rd")
+        render_match_card("M77", winners.get("I"), get_3rd(['C','D','F','G','H']), "I1", "3rd")
         render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")
         render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
-        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
-        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
+        render_match_card("M81", winners.get("D"), get_3rd(['B','E','F','I','J']), "D1", "3rd")
+        render_match_card("M82", winners.get("G"), get_3rd(['A','E','H','I','J']), "G1", "3rd")
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
         render_match_card("M76", winners.get("C"), runners_up.get("F"), "C1", "F2")
         render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "E2", "I2")
-        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
-        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
+        render_match_card("M79", winners.get("A"), get_3rd(['C','E','F','H','I']), "A1", "3rd")
+        render_match_card("M80", winners.get("L"), get_3rd(['E','H','I','J','K']), "L1", "3rd")
         render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
         render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")
-        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
-        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
+        render_match_card("M85", winners.get("B"), get_3rd(['E','F','G','I','J']), "B1", "3rd")
+        render_match_card("M87", winners.get("K"), get_3rd(['D','E','I','J','L']), "K1", "3rd")
