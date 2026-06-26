@@ -62,7 +62,7 @@ def get_flag(team_name):
         
     return ""
 
-@st.cache_data(ttl=1) # Caches data for 5 minutes so you don't break your API rate limits
+@st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
 def fetch_bracket_data():
     try:
         response = requests.get(API_URL, headers=HEADERS)
