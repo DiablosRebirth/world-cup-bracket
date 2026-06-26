@@ -31,25 +31,55 @@ FLAGS = {
 }
 
 def get_flag(team_name):
-    # 1. Direct safety check
     if not team_name:
         return "🏳️"
         
     team_lower = str(team_name).lower()
     
-    # 2. Manual override so Scotland gets its beautiful Saltire
-    if "scotland" in team_lower or "sc " in team_lower:
-        return "🏴w"
-    
-    # 3. Your original working flag logic
-    # Take the first two characters (e.g., 'se' from 'se Sweden'), convert to uppercase, and map to flag emojis
-    try:
-        code = team_lower.split()[0]
-        if len(code) == 2:
-            return "".join(chr(127397 + ord(c)) for c in code)
-    except Exception:
-        pass
+    # 1. Clean Scotland fix (no stray characters!)
+    if "scotland" in team_lower:
+        return "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
         
+    # 2. Complete mapping for the exact teams currently in your tournament
+    flag_map = {
+        "sweden": "🇸🇪",
+        "ecuador": "🇪🇨",
+        "bosnia": "🇧🇦",
+        "croatia": "🇭🇷",
+        "korea": "🇰🇷",
+        "paraguay": "🇵🇾",
+        "algeria": "🇩🇿",
+        "cape verde": "🇨🇻",
+        "belgium": "🇧🇪",
+        "germany": "🇩🇪",
+        "france": "🇫🇷",
+        "south africa": "🇿🇦",
+        "canada": "🇨🇦",
+        "netherlands": "🇳🇱",
+        "morocco": "🇲🇦",
+        "portugal": "🇵🇹",
+        "ghana": "🇬🇭",
+        "spain": "🇪🇸",
+        "austria": "🇦🇹",
+        "usa": "🇺🇸",
+        "brazil": "🇧🇷",
+        "australia": "🇦🇺",
+        "ivory coast": "🇨🇮",
+        "japan": "🇯🇵",
+        "mexico": "🇲🇽",
+        "england": "🏴󠁧󠁢󠁥󠁮󠁧󠁿",
+        "argentina": "🇦🇷",
+        "uruguay": "🇺🇾",
+        "iran": "🇮🇷",
+        "switzerland": "🇨🇭",
+        "colombia": "🇨🇴"
+    }
+    
+    # Search the map for a match
+    for key, emoji in flag_map.items():
+        if key in team_lower:
+            return emoji
+            
     return "🏳️"
 
 @st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
