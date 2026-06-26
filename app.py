@@ -31,25 +31,25 @@ FLAGS = {
 }
 
 def get_flag(team_name):
-    # Convert to string and lowercase safely
+    # 1. Direct safety check
+    if not team_name:
+        return "🏳️"
+        
     team_lower = str(team_name).lower()
     
-    # 1. Manual override for Scotland
+    # 2. Manual override so Scotland gets its beautiful Saltire
     if "scotland" in team_lower or "sc " in team_lower:
-        return "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
-        
-    # 2. Your original logic to extract the 2-letter code
-    # (Assuming your original code split the string or took the first 2 letters)
+        return "🏴w"
+    
+    # 3. Your original working flag logic
+    # Take the first two characters (e.g., 'se' from 'se Sweden'), convert to uppercase, and map to flag emojis
     try:
-        # If your data looks like "se Sweden", we split by space and take the first part
         code = team_lower.split()[0]
         if len(code) == 2:
-            # This converts 'se' to the regional indicator emojis for the flag
             return "".join(chr(127397 + ord(c)) for c in code)
-    except:
+    except Exception:
         pass
-
-    # Fallback if nothing else matches
+        
     return "🏳️"
 
 @st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
