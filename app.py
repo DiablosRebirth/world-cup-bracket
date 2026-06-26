@@ -36,7 +36,7 @@ def get_flag(team_name):
         
     team_lower = str(team_name).lower()
     
-    # 2-letter ISO code mapping for the exact teams in your tournament
+    # 2-letter ISO code mapping for the teams
     code_map = {
         "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
         "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
@@ -45,9 +45,9 @@ def get_flag(team_name):
         "ghana": "gh", "spain": "es", "austria": "at", "usa": "us",
         "brazil": "br", "australia": "au", "ivory coast": "ci", "japan": "jp",
         "mexico": "mx", "argentina": "ar", "uruguay": "uy", "iran": "ir",
-        "switzerland": "ch", "colombia": "co",
-        # Special cases for UK nations
-        "scotland": "gb-sct", "england": "gb-eng"
+        "switzerland": "ch", "colombia": "co", "senegal": "sn", "egypt": "eg",
+        # Special matching for DR and UK nations
+        "dr": "cd", "scotland": "gb-sct", "england": "gb-eng"
     }
     
     # Find the code
@@ -58,7 +58,6 @@ def get_flag(team_name):
             break
             
     if country_code:
-        # Returns a beautifully sharp, rendered flat flag image tag
         return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
         
     return ""
