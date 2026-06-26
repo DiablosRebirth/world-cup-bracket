@@ -25,7 +25,6 @@ def get_flag(team_name):
         return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
         
     team_lower = str(team_name).lower()
-    
     code_map = {
         "sweden": "se", "ecuador": "ec", "bosnia": "ba", "croatia": "hr",
         "korea": "kr", "paraguay": "py", "algeria": "dz", "cape verde": "cv",
@@ -46,7 +45,6 @@ def get_flag(team_name):
             
     if country_code:
         return f'<img src="https://flagcdn.com/w40/{country_code}.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
-        
     return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
 
 @st.cache_data(ttl=60) 
@@ -80,7 +78,7 @@ def fetch_bracket_data():
     except Exception as e: 
         st.sidebar.warning(f"🔄 API Syncing - Using Live Fallback Engine: {e}")
 
-    # Post-Group Stage Fallback Dataset (Guaranteed safe structure)
+    # Solid Global Fallbacks
     w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
     r = {"A": "South Africa", "B": "Canada", "C": "USA", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "France", "J": "Austria", "K": "Colombia", "L": "Paraguay"}
     df_mock = pd.DataFrame([
@@ -99,15 +97,13 @@ def fetch_bracket_data():
 # ==========================================
 fetch_res = fetch_bracket_data()
 
-# Absolutely ensure variables are unpacked correctly regardless of live or fallback state
 if fetch_res and len(fetch_res) == 3:
     winners, runners_up, df_3rd = fetch_res
 else:
-    # Safe immediate emergency definition if the data structure gets corrupted
     winners, runners_up = {}, {}
-    df_3rd = pd.DataFrame(columns=["Rank", "Group", "Team", "Points", "GD", "GF"])
+    df_3rd = None
 
-# Fallback mechanism if df_3rd is empty or missing columns
+# If df_3rd is empty, instantiate clean data structure right away
 if df_3rd is None or df_3rd.empty or "Rank" not in df_3rd.columns:
     df_3rd = pd.DataFrame([
         {"Group": "F", "Team": "Sweden", "Points": 4, "GD": 0, "GF": 6},
@@ -123,27 +119,25 @@ if df_3rd is None or df_3rd.empty or "Rank" not in df_3rd.columns:
 
 df_3rd["Status"] = ["🟢 Qualified" if r <= 8 else "🔴 Eliminated" for r in df_3rd["Rank"]]
 
-# Safely extract the top 8 teams for the bracket mapping
+# CRITICAL SECURITY FIX: Fallback layout verification check if top_8 slice returns empty
 top_8 = df_3rd[df_3rd["Rank"] <= 8].copy()
+if top_8.empty:
+    top_8 = df_3rd.head(8).copy()
 
 # ==========================================
 # DYNAMIC 3RD-PLACE ALLOCATION ENGINE
 # ==========================================
-# Create a valid list of dictionaries to draw from sequentially without matching errors
 available_3rd = top_8.sort_values(by="Rank").to_dict(orientation="records")
 
 def get_live_3rd(preferred_groups):
-    # 1. Look for the highest-ranked available team matching preferred groups
     for team_record in available_3rd:
         if team_record["Group"] in preferred_groups:
             available_3rd.remove(team_record)
             return team_record["Team"]
             
-    # 2. Live Fallback: Grab the best ranked team remaining in the pool
     if available_3rd:
         next_best = available_3rd.pop(0)
         return next_best["Team"]
-        
     return "TBD"
 
 # Run allocation sequences smoothly
@@ -155,3 +149,38 @@ m82_3rd = get_live_3rd(['A','E','H','I','J'])
 m81_3rd = get_live_3rd(['B','E','F','I','J'])
 m87_3rd = get_live_3rd(['D','E','I','J','L'])
 m85_3rd = get_live_3rd(['E','F','G','I','J'])
+
+# ==========================================
+# 3. WEB INTERFACE DESIGN
+# ==========================================
+col1, col2 = st.columns([1, 2.2])
+
+name_replacements = {
+    "congo dr": "DR Congo",
+    "korea republic": "South Korea",
+    "cengo dr": "DR Congo"
+}
+
+def clean_team_name(name_str):
+    if not name_str or str(name_str).lower() == "none":
+        return "TBD"
+    words = str(name_str).split()
+    if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
+        name_str = " ".join(words[1:])
+    return name_replacements.get(name_str.lower(), name_str)
+
+with col1:
+    st.subheader("📊 3rd Place Rankings Tier")
+    display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
+    display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
+    st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
+
+with col2:
+    st.subheader("⚔️ Live Round of 32 Fixtures Map")
+
+    def render_match_card(match_id, t1, t2, label1, label2):
+        clean_t1 = clean_team_name(t1)
+        clean_t2 = clean_team_name(t2)
+
+        html_content = f'<div style="border:2px solid #cbd5e1;border-radius:10px;padding:14px;margin-bottom:14px;background-color:#ffffff;box-shadow:0 3px 6px rgba(0,0,0,0.08);">' \
+                       f'<span style="font-weight:800;color:#334155;font-size:12px;background-color:#e2e8f0;padding:4px 10px;border-radius:6px;font-family:sans-serif
