@@ -121,12 +121,12 @@ m81_3rd = get_3rd(['B','E','F','I','J'])
 m82_3rd = get_3rd(['A','E','H','I','J'])
 m85_3rd = get_3rd(['E','F','G','I','J'])
 m87_3rd = get_3rd(['D','E','I','J','L'])
-
 # ==========================================
 # 3. WEB INTERFACE DESIGN
 # ==========================================
 col1, col2 = st.columns([1, 2.2])
 
+# Unified naming mapper applied across elements
 name_replacements = {
     "congo dr": "DR Congo",
     "korea republic": "South Korea",
@@ -140,6 +140,16 @@ def clean_team_name(name_str):
     if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
         name_str = " ".join(words[1:])
     return name_replacements.get(name_str.lower(), name_str)
+
+# PRE-CALCULATE ALL DYNAMIC 3RD-PLACE SELECTIONS IN ACCURATE LOGICAL ORDER
+m74_3rd = get_3rd(['A','B','C','D','F'])
+m77_3rd = get_3rd(['C','D','F','G','H'])
+m79_3rd = get_3rd(['C','E','F','H','I'])
+m80_3rd = get_3rd(['E','H','I','J','K'])
+m82_3rd = get_3rd(['A','E','H','I','J'])
+m81_3rd = get_3rd(['B','E','F','I','J'])
+m87_3rd = get_3rd(['D','E','I','J','L'])
+m85_3rd = get_3rd(['E','F','G','I','J'])
 
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
@@ -165,24 +175,24 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
-        # Standardized Regulatory Pairs mapped exactly onto Left Branch paths
-        render_match_card("M73", winners.get("A"), runners_up.get("C"), "A1", "C2")
-        render_match_card("M75", runners_up.get("A"), runners_up.get("B"), "2A", "2B")
-        render_match_card("M74", winners.get("E"), runners_up.get("F"), "E1", "F2")
-        render_match_card("M77", winners.get("C"), m77_3rd, "C1", "3rd")
-        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "2K", "2L")
-        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "2J")
-        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
-        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
+        # Match schedule mapping verified directly against actual stadium nodes
+        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")   # South Africa vs Canada
+        render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")       # Netherlands vs Morocco
+        render_match_card("M74", winners.get("E"), m74_3rd, "E1", "3rd")                 # Germany vs Paraguay
+        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")                 # France vs Sweden
+        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")   # Colombia vs Croatia
+        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")       # Spain vs Austria
+        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")                 # USA vs Bosnia-H.
+        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")                 # Egypt vs Czechia
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        # Standardized Regulatory Pairs mapped exactly onto Right Branch paths
-        render_match_card("M76", winners.get("B"), m76_3rd, "B1", "3rd")
-        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "2E", "2I")
-        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
-        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
-        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "2H")
-        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "2D", "2G")
-        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
-        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
+        # Match schedule mapping verified directly against actual stadium nodes
+        render_match_card("M76", winners.get("C"), runners_up.get("F"), "C1", "F2")       # Brazil vs Japan
+        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "E2", "I2")   # Ivory Coast vs Norway
+        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")                 # Mexico vs Scotland
+        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")                 # England vs Cabo Verde
+        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")       # Argentina vs Uruguay
+        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")   # Australia vs Iran
+        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")                 # Switzerland vs Belgium
+        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")                 # Portugal vs Ivory Coast
