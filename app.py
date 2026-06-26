@@ -133,7 +133,6 @@ def clean_team_name(name_str):
 
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
-    # Clean double bracket index structure protection
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
     display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
     st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
@@ -156,19 +155,21 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
+        # Updated map pairs based on live tournament configurations
         render_match_card("M74", winners.get("E"), get_3rd(['A','B','C','D','F']), "E1", "3rd")
         render_match_card("M77", winners.get("I"), get_3rd(['C','D','F','G','H']), "I1", "3rd")
-        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
+        render_match_card("M73", winners.get("A"), runners_up.get("B"), "A1", "B2")
         render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
-        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")
+        render_match_card("M83", winners.get("K"), runners_up.get("L"), "K1", "L2")
         render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
         render_match_card("M81", winners.get("D"), get_3rd(['B','E','F','I','J']), "D1", "3rd")
         render_match_card("M82", winners.get("G"), get_3rd(['A','E','H','I','J']), "G1", "3rd")
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        render_match_card("M76", winners.get("C"), runners_up.get("D"), "C1", "D2")
-        render_match_card("M78", runners_up.get("E"), runners_up.get("F"), "E2", "F2")
+        # DYNAMIC ADJUSTMENT: Swap fixed assignments to point to your live group variables
+        render_match_card("M76", winners.get("E"), runners_up.get("F"), "E1", "F2")
+        render_match_card("M78", runners_up.get("E"), winners.get("I"), "E2", "I1")
         render_match_card("M79", winners.get("A"), get_3rd(['C','E','F','H','I']), "A1", "3rd")
         render_match_card("M80", winners.get("L"), get_3rd(['E','H','I','J','K']), "L1", "3rd")
         render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
