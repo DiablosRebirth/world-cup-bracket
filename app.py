@@ -124,14 +124,24 @@ with col1:
     st.subheader("📊 3rd Place Rankings Tier")
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
     
-    # Smart cleaner: only strips the first word if it's a 2-letter lowercase country code
+    # Custom name overrides
+    name_replacements = {
+        "congo dr": "DR Congo",
+        "korea republic": "South Korea"
+    }
+    
     def clean_team_name(name_str):
+        # 1. Strip the 2-letter lowercase prefix if present
         words = str(name_str).split()
         if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
-            return " ".join(words[1:])
-        return name_str
+            name_str = " ".join(words[1:])
+        else:
+            name_str = str(name_str)
+            
+        # 2. Apply explicit naming overrides
+        return name_replacements.get(name_str.lower(), name_str)
 
-    # Apply the beautiful flag image next to the fully intact country name
+    # Render flag images next to the perfectly mapped country names
     display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
     
     st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
