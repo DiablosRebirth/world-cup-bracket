@@ -111,16 +111,35 @@ def get_3rd(choices):
     return "TBD"
 
 # ==========================================
-# PRE-CALCULATE ALL REGULATORY 3RD-PLACE POSITIONS
+# DYNAMIC 3RD-PLACE ALLOCATION ENGINE
 # ==========================================
-m76_3rd = get_3rd(['E','F','G','I','J'])
-m77_3rd = get_3rd(['A','F','G','H','I'])
-m79_3rd = get_3rd(['C','E','F','H','I'])
-m80_3rd = get_3rd(['E','H','I','J','K'])
-m81_3rd = get_3rd(['B','E','F','I','J'])
-m82_3rd = get_3rd(['A','E','H','I','J'])
-m85_3rd = get_3rd(['E','F','G','I','J'])
-m87_3rd = get_3rd(['D','E','I','J','L'])
+# Create a copy of the top 8 teams to safely draw from sequentially
+available_3rd = top_8.copy().sort_values(by="Rank").to_dict(orientation="records")
+
+def get_live_3rd(preferred_groups):
+    # 1. Try to find the highest-ranked available team from the preferred groups
+    for team_record in available_3rd:
+        if team_record["Group"] in preferred_groups:
+            available_3rd.remove(team_record)
+            return team_record["Team"]
+            
+    # 2. Live Fallback: If no preferred group team is left, grab the absolute best ranked team remaining
+    if available_3rd:
+        next_best = available_3rd.pop(0)
+        return next_best["Team"]
+        
+    return "TBD"
+
+# Pull allocations in order—fully guaranteed to populate using today's live table standings
+m74_3rd = get_live_3rd(['A','B','C','D','F'])
+m77_3rd = get_live_3rd(['C','D','F','G','H'])
+m79_3rd = get_live_3rd(['C','E','F','H','I'])
+m80_3rd = get_live_3rd(['E','H','I','J','K'])
+m82_3rd = get_live_3rd(['A','E','H','I','J'])
+m81_3rd = get_live_3rd(['B','E','F','I','J'])
+m87_3rd = get_live_3rd(['D','E','I','J','L'])
+m85_3rd = get_live_3rd(['E','F','G','I','J'])
+
 # ==========================================
 # 3. WEB INTERFACE DESIGN
 # ==========================================
@@ -140,16 +159,6 @@ def clean_team_name(name_str):
     if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
         name_str = " ".join(words[1:])
     return name_replacements.get(name_str.lower(), name_str)
-
-# PRE-CALCULATE ALL DYNAMIC 3RD-PLACE SELECTIONS IN ACCURATE LOGICAL ORDER
-m74_3rd = get_3rd(['A','B','C','D','F'])
-m77_3rd = get_3rd(['C','D','F','G','H'])
-m79_3rd = get_3rd(['C','E','F','H','I'])
-m80_3rd = get_3rd(['E','H','I','J','K'])
-m82_3rd = get_3rd(['A','E','H','I','J'])
-m81_3rd = get_3rd(['B','E','F','I','J'])
-m87_3rd = get_3rd(['D','E','I','J','L'])
-m85_3rd = get_3rd(['E','F','G','I','J'])
 
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
@@ -175,24 +184,22 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
-        # Match schedule mapping verified directly against actual stadium nodes
-        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")   # South Africa vs Canada
-        render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")       # Netherlands vs Morocco
-        render_match_card("M74", winners.get("E"), m74_3rd, "E1", "3rd")                 # Germany vs Paraguay
-        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")                 # France vs Sweden
-        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")   # Colombia vs Croatia
-        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")       # Spain vs Austria
-        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")                 # USA vs Bosnia-H.
-        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")                 # Egypt vs Czechia
+        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
+        render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
+        render_match_card("M74", winners.get("E"), m74_3rd, "E1", "3rd")
+        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")
+        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "K2", "L2")
+        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
+        render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
+        render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        # Match schedule mapping verified directly against actual stadium nodes
-        render_match_card("M76", winners.get("C"), runners_up.get("F"), "C1", "F2")       # Brazil vs Japan
-        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "E2", "I2")   # Ivory Coast vs Norway
-        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")                 # Mexico vs Scotland
-        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")                 # England vs Cabo Verde
-        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")       # Argentina vs Uruguay
-        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")   # Australia vs Iran
-        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")                 # Switzerland vs Belgium
-        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")                 # Portugal vs Ivory Coast
+        render_match_card("M76", winners.get("C"), runners_up.get("F"), "C1", "F2")
+        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "E2", "I2")
+        render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
+        render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
+        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
+        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")
+        render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
+        render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
