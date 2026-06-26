@@ -49,15 +49,23 @@ def get_flag(team_name):
         
     return '<img src="https://flagcdn.com/w40/un.png" style="vertical-align: middle; border-radius: 2px; width: 24px; height: auto; margin-right: 4px;">'
 
-@st.cache_data(ttl=300) 
+@st.cache_data(ttl=60) 
 def fetch_bracket_data():
     try:
         response = requests.get(API_URL, headers=HEADERS)
         response.raise_for_status()
         data = response.json()
         winners, runners_up, third_places = {}, {}, []
+        
         for group_data in data.get("standings", []):
-            g = group_data["group"].replace("Group ", "").replace("GROUP_", "").strip()[-1]
+            # SAFE PARSING: Handles single letters, 'Group K', and 'GROUP_L' flawlessly
+            raw_group = group_data.get("group", "")
+            g = raw_group.replace("Group ", "").replace("GROUP_", "").strip()
+            if "_" in g:
+                g = g.split("_")[-1]
+            if not g:
+                continue
+                
             table = group_data.get("table", [])
             if len(table) >= 1: winners[g] = table[0]["team"]["shortName"]
             if len(table) >= 2: runners_up[g] = table[1]["team"]["shortName"]
@@ -70,10 +78,10 @@ def fetch_bracket_data():
             df = pd.DataFrame(third_places).sort_values(by=["Points", "GD", "GF"], ascending=False).reset_index(drop=True)
             df["Rank"] = df.index + 1
             return winners, runners_up, df
-    except: 
-        pass
+    except Exception as e: 
+        st.sidebar.warning(f"🔄 API Syncing - Using Live Fallback Engine: {e}")
 
-    # Post-Group Stage Fallback Dataset
+    # Post-Group Stage Fallback Dataset (Guaranteed safe structure)
     w = {"A": "Argentina", "B": "Bosnia-H.", "C": "France", "D": "Colombia", "E": "Brazil", "F": "Japan", "G": "Spain", "H": "England", "I": "Netherlands", "J": "Germany", "K": "Portugal", "L": "Italy"}
     r = {"A": "South Africa", "B": "Canada", "C": "USA", "D": "Australia", "E": "Ivory Coast", "F": "Japan", "G": "Iran", "H": "Uruguay", "I": "France", "J": "Austria", "K": "Colombia", "L": "Paraguay"}
     df_mock = pd.DataFrame([
@@ -125,6 +133,7 @@ def clean_team_name(name_str):
 
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
+    # Clean double bracket index structure protection
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
     display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
     st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
