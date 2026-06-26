@@ -31,12 +31,26 @@ FLAGS = {
 }
 
 def get_flag(team_name):
-    # Convert to lowercase to catch any variation
+    # Convert to string and lowercase safely
     team_lower = str(team_name).lower()
     
-    # Explicit override for Scotland
+    # 1. Manual override for Scotland
     if "scotland" in team_lower or "sc " in team_lower:
         return "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
+        
+    # 2. Your original logic to extract the 2-letter code
+    # (Assuming your original code split the string or took the first 2 letters)
+    try:
+        # If your data looks like "se Sweden", we split by space and take the first part
+        code = team_lower.split()[0]
+        if len(code) == 2:
+            # This converts 'se' to the regional indicator emojis for the flag
+            return "".join(chr(127397 + ord(c)) for c in code)
+    except:
+        pass
+
+    # Fallback if nothing else matches
+    return "🏳️"
 
 @st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
 def fetch_bracket_data():
