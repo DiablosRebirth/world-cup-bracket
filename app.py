@@ -124,10 +124,16 @@ with col1:
     st.subheader("📊 3rd Place Rankings Tier")
     display_df = df_3rd[["Rank", "Group", "Team", "Points", "GD", "GF", "Status"]].copy()
     
-    # This securely pairs the flag image layout next to the team name text string
-    display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {row['Team'].split()[-1] if len(row['Team'].split())>1 else row['Team']}", axis=1)
+    # Smart cleaner: only strips the first word if it's a 2-letter lowercase country code
+    def clean_team_name(name_str):
+        words = str(name_str).split()
+        if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
+            return " ".join(words[1:])
+        return name_str
+
+    # Apply the beautiful flag image next to the fully intact country name
+    display_df["Team"] = display_df.apply(lambda row: f"{get_flag(row['Team'])} {clean_team_name(row['Team'])}", axis=1)
     
-    # Switch st.dataframe to st.write with unsafe HTML so it draws the images!
     st.write(display_df.to_html(escape=False, index=False), unsafe_allow_html=True)
 
 with col2:
