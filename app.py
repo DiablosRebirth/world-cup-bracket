@@ -58,7 +58,6 @@ def fetch_bracket_data():
         winners, runners_up, third_places = {}, {}, []
         
         for group_data in data.get("standings", []):
-            # SAFE PARSING: Handles single letters, 'Group K', and 'GROUP_L' flawlessly
             raw_group = group_data.get("group", "")
             g = raw_group.replace("Group ", "").replace("GROUP_", "").strip()
             if "_" in g:
@@ -112,11 +111,22 @@ def get_3rd(choices):
     return "TBD"
 
 # ==========================================
+# PRE-CALCULATE ALL REGULATORY 3RD-PLACE POSITIONS
+# ==========================================
+m76_3rd = get_3rd(['E','F','G','I','J'])
+m77_3rd = get_3rd(['A','F','G','H','I'])
+m79_3rd = get_3rd(['C','E','F','H','I'])
+m80_3rd = get_3rd(['E','H','I','J','K'])
+m81_3rd = get_3rd(['B','E','F','I','J'])
+m82_3rd = get_3rd(['A','E','H','I','J'])
+m85_3rd = get_3rd(['E','F','G','I','J'])
+m87_3rd = get_3rd(['D','E','I','J','L'])
+
+# ==========================================
 # 3. WEB INTERFACE DESIGN
 # ==========================================
 col1, col2 = st.columns([1, 2.2])
 
-# Unified naming mapper applied across elements
 name_replacements = {
     "congo dr": "DR Congo",
     "korea republic": "South Korea",
@@ -130,16 +140,6 @@ def clean_team_name(name_str):
     if len(words) > 1 and len(words[0]) == 2 and words[0].islower():
         name_str = " ".join(words[1:])
     return name_replacements.get(name_str.lower(), name_str)
-
-# PRE-CALCULATE ALL 3RD-PLACE ALLOCATIONS IN STABLE SEQUENTIAL ORDER
-m74_3rd = get_3rd(['A','B','C','D','F'])
-m77_3rd = get_3rd(['C','D','F','G','H'])
-m81_3rd = get_3rd(['B','E','F','I','J'])
-m82_3rd = get_3rd(['A','E','H','I','J'])
-m79_3rd = get_3rd(['C','E','F','H','I'])
-m80_3rd = get_3rd(['E','H','I','J','K'])
-m85_3rd = get_3rd(['E','F','G','I','J'])
-m87_3rd = get_3rd(['D','E','I','J','L'])
 
 with col1:
     st.subheader("📊 3rd Place Rankings Tier")
@@ -165,23 +165,24 @@ with col2:
     
     with m_col1:
         st.markdown("#### 🟦 Left Tree Panel")
-        # Match 73 fixed to runners_up A2 vs B2 (South Africa vs Canada)
-        render_match_card("M74", winners.get("J"), m74_3rd, "J1", "3rd")
-        render_match_card("M77", winners.get("I"), m77_3rd, "I1", "3rd")
-        render_match_card("M73", runners_up.get("A"), runners_up.get("B"), "A2", "B2")
-        render_match_card("M75", winners.get("F"), runners_up.get("C"), "F1", "C2")
-        render_match_card("M83", winners.get("K"), runners_up.get("L"), "K1", "L2")
-        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "J2")
+        # Standardized Regulatory Pairs mapped exactly onto Left Branch paths
+        render_match_card("M73", winners.get("A"), runners_up.get("C"), "A1", "C2")
+        render_match_card("M75", runners_up.get("A"), runners_up.get("B"), "2A", "2B")
+        render_match_card("M74", winners.get("E"), runners_up.get("F"), "E1", "F2")
+        render_match_card("M77", winners.get("C"), m77_3rd, "C1", "3rd")
+        render_match_card("M83", runners_up.get("K"), runners_up.get("L"), "2K", "2L")
+        render_match_card("M84", winners.get("H"), runners_up.get("J"), "H1", "2J")
         render_match_card("M81", winners.get("D"), m81_3rd, "D1", "3rd")
         render_match_card("M82", winners.get("G"), m82_3rd, "G1", "3rd")
 
     with m_col2:
         st.markdown("#### 🟩 Right Tree Panel")
-        render_match_card("M76", winners.get("E"), runners_up.get("F"), "E1", "F2")
-        render_match_card("M78", runners_up.get("E"), winners.get("I"), "E2", "I1")
+        # Standardized Regulatory Pairs mapped exactly onto Right Branch paths
+        render_match_card("M76", winners.get("B"), m76_3rd, "B1", "3rd")
+        render_match_card("M78", runners_up.get("E"), runners_up.get("I"), "2E", "2I")
         render_match_card("M79", winners.get("A"), m79_3rd, "A1", "3rd")
         render_match_card("M80", winners.get("L"), m80_3rd, "L1", "3rd")
-        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "H2")
-        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "D2", "G2")
+        render_match_card("M86", winners.get("J"), runners_up.get("H"), "J1", "2H")
+        render_match_card("M88", runners_up.get("D"), runners_up.get("G"), "2D", "2G")
         render_match_card("M85", winners.get("B"), m85_3rd, "B1", "3rd")
         render_match_card("M87", winners.get("K"), m87_3rd, "K1", "3rd")
