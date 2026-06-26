@@ -31,7 +31,12 @@ FLAGS = {
 }
 
 def get_flag(team_name):
-    return FLAGS.get(team_name, "🏳️")
+    # Convert to lowercase to catch any variation
+    team_lower = str(team_name).lower()
+    
+    # Explicit override for Scotland
+    if "scotland" in team_lower or "sc " in team_lower:
+        return "🏴󠁧󠁢󠁳󠁣󠁴󠁿"
 
 @st.cache_data(ttl=300) # Caches data for 5 minutes so you don't break your API rate limits
 def fetch_bracket_data():
